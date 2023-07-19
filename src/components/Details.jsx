@@ -1,17 +1,44 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { styled } from "styled-components";
+//these dependenies are important
+import { db } from "../firebase";
+import { doc, getDoc } from "firebase/firestore/lite";
 
 const Details = () => {
+  const { id } = useParams();
+
+  // most important is doc(db, collection, id);
+  // link below where I found the solution
+  const docRef = doc(db, "movies", id);
+
+  const [movieData, setMovieData] = useState([]);
+
+  useEffect(() => {
+    // we have to use getDocs for finding any document for specifics id...
+    async function filter() {
+      try {
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          setMovieData(docSnap.data());
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    filter();
+  }, []);
+
+  console.log(movieData);
   return (
     <Container>
       <Background>
-        <img src="https://wallpapercave.com/wp/wp8528396.jpg" alt="" />
+        <img src={movieData.images} alt="" />
       </Background>
       <ImageTitle>
-        <img
-          src="https://www.freepnglogos.com/uploads/avengers-png-logo/the-avengers-png-logo-1.png"
-          alt=""
-        />
+        <img src={movieData.title_img} alt="" />
       </ImageTitle>
 
       <Controls>
@@ -31,12 +58,10 @@ const Details = () => {
         </GroupWatchButton>
       </Controls>
 
-      <Subtitle>2018 - 7m + Family, Fantasy, Kids, Animation</Subtitle>
-      <Description>
-        Nick Fury is compelled to launch the Avengers Initiative when Loki poses
-        a threat to planet Earth. His squad of superheroes put their minds
-        together to accomplish the task.
-      </Description>
+      <Subtitle>
+        {movieData.year} - {movieData.runtime} + {movieData.genre}
+      </Subtitle>
+      <Description>{movieData.plot}</Description>
     </Container>
   );
 };
@@ -70,6 +95,7 @@ const ImageTitle = styled.div`
   min-height: 170px;
   min-width: 200px;
   width: 40vw;
+  backgorund: none;
 
   img {
     width: 100%;
@@ -143,3 +169,5 @@ const Description = styled.div`
   color: rgba(249, 249, 249);
   max-width: 760px;
 `;
+
+// https://softauthor.com/firebase-firestore-get-document-by-id/
