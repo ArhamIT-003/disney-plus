@@ -1,10 +1,29 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { styled } from "styled-components";
 import ImgSlider from "./ImgSlider";
 import Viewers from "./Viewers";
 import Movies from "./Movies";
+import { db } from "../firebase";
+import { getDocs, collection } from "firebase/firestore/lite";
 
 const Home = () => {
+  const moviesCollection = collection(db, "movies");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const querySnapshot = await getDocs(moviesCollection);
+        querySnapshot.docs.map((doc) => {
+          console.log(doc.id, doc.data());
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  });
+
   return (
     <Container>
       <ImgSlider />
