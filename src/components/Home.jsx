@@ -9,13 +9,20 @@ import { getDocs, collection } from "firebase/firestore/lite";
 const Home = () => {
   const moviesCollection = collection(db, "movies");
 
+  // you can fetch data using this from Firestore..
   useEffect(() => {
     const fetchData = async () => {
+
       try {
+
         const querySnapshot = await getDocs(moviesCollection);
-        querySnapshot.docs.map((doc) => {
-          console.log(doc.id, doc.data());
+        let moviesData = querySnapshot.docs.map((doc) => {
+          return { id: doc.id, ...doc.data() };
+          
         });
+
+        console.log(moviesData);
+
       } catch (error) {
         console.error("Error fetching data:", error);
       }
