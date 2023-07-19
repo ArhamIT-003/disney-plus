@@ -5,24 +5,27 @@ import Viewers from "./Viewers";
 import Movies from "./Movies";
 import { db } from "../firebase";
 import { getDocs, collection } from "firebase/firestore/lite";
+import { useDispatch } from "react-redux";
+import { setMovies } from "../features/movie/movieSlice";
 
 const Home = () => {
+  // use useDispatch inorder to send the data to the movies (initial-State) in movieSlice
+  const dispatch = useDispatch();
   const moviesCollection = collection(db, "movies");
 
   // you can fetch data using this from Firestore..
   useEffect(() => {
     const fetchData = async () => {
-
       try {
-
         const querySnapshot = await getDocs(moviesCollection);
+        // after querySnapshot we have to map the it for data and also use async and await because it will return a promise
+        // moviesData create an object where our data and its document id is objected.
+        // then we will dispatch to send data to the setMovies which is going to store the data in redux
         let moviesData = querySnapshot.docs.map((doc) => {
           return { id: doc.id, ...doc.data() };
-          
         });
 
-        console.log(moviesData);
-
+        dispatch(setMovies(moviesData));
       } catch (error) {
         console.error("Error fetching data:", error);
       }
